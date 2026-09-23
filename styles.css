@@ -163,9 +163,15 @@ h1 { margin: 0; font-size: 2.2rem; font-weight: 700; letter-spacing: .04em; }
   animation: spin .9s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+/* mirror = horizontal mirror (left-side asset shown as a right-side tooth).
+   flip   = 180° rotation in the image plane (crown-down <-> crown-up). A vertical mirror would
+            turn the tooth into its opposite-side twin, so it must be a rotation.
+   3D models get their flip as a real 3D roll via the `orientation` attribute instead. */
 .tooth-view.mirror :is(img, model-viewer, iframe) { transform: scaleX(-1); }
-.tooth-view.flip :is(img, model-viewer, iframe) { transform: scaleY(-1); }
-.tooth-view.mirror.flip :is(img, model-viewer, iframe) { transform: scale(-1, -1); }
+.tooth-view.flip :is(img, iframe) { transform: rotate(180deg); }
+.tooth-view.mirror.flip :is(img, iframe) { transform: scaleY(-1); }
+.tooth-view model-viewer { --progress-bar-color: transparent; --progress-mask: transparent; }
+.tooth-view model-viewer::part(default-progress-bar) { display: none; }
 .credit {
   position: absolute; left: 0; right: 0; bottom: 0; margin: 0; text-align: center;
   font-size: .7rem; letter-spacing: .04em; color: var(--muted); opacity: .7;

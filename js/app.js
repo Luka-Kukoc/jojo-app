@@ -145,8 +145,9 @@
     // "crownUp:false" means the asset is natively crown-down, so invert the decision.
     const nativeCrownUp = asset.crownUp !== false;
     const fileFlip = nativeCrownUp ? flip : !flip;
+    const isModel = !!asset.src && /\.(glb|gltf)(\?|$)/i.test(asset.src);
     if (asset.mirror) container.classList.add('mirror');
-    if (fileFlip) container.classList.add('flip');
+    if (fileFlip && !isModel) container.classList.add('flip'); // models are rolled in 3D instead
 
     if (asset.sketchfab) {
       container.classList.add('card');
@@ -184,20 +185,25 @@
       return;
     }
 
-    if (/\.(glb|gltf)(\?|$)/i.test(asset.src)) {
+    if (isModel) {
+      // keep the container empty (no drawing) while loading so nothing hints at the answer
       ensureModelViewer().then(() => {
         if (!container.isConnected) return;
         const mv = document.createElement('model-viewer');
         mv.setAttribute('src', asset.src);
-        mv.setAttribute('shadow-intensity', '1');
-        mv.setAttribute('exposure', '1');
+        mv.setAttribute('alt', '3D tooth model');
+        mv.setAttribute('loading', 'eager');
+        mv.setAttribute('environment-image', 'neutral');
+        mv.setAttribute('exposure', '0.9');
+        mv.setAttribute('shadow-intensity', '0');
         mv.setAttribute('interaction-prompt', 'none');
-        if (interactive) { mv.setAttribute('camera-controls', ''); mv.setAttribute('auto-rotate', ''); }
+        mv.setAttribute('touch-action', 'pan-y');
+        if (fileFlip) mv.setAttribute('orientation', '180deg 0deg 0deg'); // roll about the view axis
+        if (interactive) mv.setAttribute('camera-controls', '');
         mv.addEventListener('error', renderSVG);
         container.innerHTML = '';
         container.appendChild(mv);
       }).catch(renderSVG);
-      container.innerHTML = renderToothSVG(tooth, { mirror: tooth.side === 'left', flip });
       return;
     }
 

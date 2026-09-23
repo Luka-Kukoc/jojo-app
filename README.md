@@ -6,8 +6,8 @@ tooth, pick one of four answers, and get a score at the end. No backend, no buil
 ## Features
 
 - All 32 permanent teeth with built-in illustrations (buccal / labial view).
-- **3D models** of every tooth from the University of Dundee (CC BY), shown in the Sketchfab
-  viewer and rotatable, or the built-in **illustrations** (offline). Switchable on the start screen.
+- **3D models** of every tooth from the University of Dundee (CC BY), rotatable, or the
+  built-in **illustrations**. Switchable on the start screen.
 - Your own photos or `.glb` models can also be dropped in per tooth, see below.
 - **Orientation** setting so the arch is not given away:
   - *Uniform*: every tooth is shown crown-up (default).
@@ -45,18 +45,19 @@ Vercel work the same way: point them at this folder.
 
 ## 3D models (default)
 
-The **3D model** display uses the [University of Dundee, School of Dentistry "Permanent Teeth"](https://sketchfab.com/DundeeDental/collections/permanent-teeth-4c0d0548c40c463c8cdceb6e0d08df7f)
-models (17 CT-derived models, one per tooth type, **CC BY 4.0**) through Sketchfab's embed
-viewer. Nothing is downloaded or hosted: `assets/teeth/manifest.js` maps each of the 32 teeth
-to a Sketchfab model id, right-side teeth are mirrored copies of the left-side models, and the
-credit line required by the license is shown under the model.
+The **3D model** display shows the [University of Dundee, School of Dentistry "Permanent Teeth"](https://sketchfab.com/DundeeDental/collections/permanent-teeth-4c0d0548c40c463c8cdceb6e0d08df7f)
+models (17 CT-derived models, one per tooth type, **CC BY 4.0**), shipped as local `.glb` files
+in `assets/teeth/` and rendered with [`<model-viewer>`](https://modelviewer.dev). Each model was
+compressed from about 3-5 MB to a few hundred KB (Draco geometry + WebP textures) with
+`@gltf-transform/cli optimize`, so the whole set is a few MB.
 
-- The viewer is embedded oversized inside a clipped card so Sketchfab's title bar, logo and
-  annotation list (which would name the tooth) never show. Annotations are also disabled.
+- `assets/teeth/manifest.js` maps each of the 32 teeth to a file. The models are left-side
+  teeth, so right-side teeth are mirrored copies; uppers are posed crown-down, so the
+  orientation setting rolls them 180° in 3D when needed.
 - The next question's model is preloaded in a hidden slot, so advancing is instant.
-- Needs an internet connection. The **Illustration** setting uses the built-in drawings and works offline.
-- To use a different Sketchfab model for a tooth, change its `sketchfab` id in the manifest and
-  set `crownUp` to match how that model is posed.
+- Works offline once loaded; only the model-viewer library comes from a CDN.
+- The credit line required by the license is shown under the model; see `assets/teeth/ATTRIBUTION.md`.
+- The **Illustration** setting uses the built-in drawings instead.
 
 ## Adding your own images or models
 
@@ -64,14 +65,15 @@ Register any file in `assets/teeth/manifest.js`, keyed by FDI number:
 
 ```js
 window.TOOTH_ASSETS = {
-  16: { sketchfab: 'e719a474ef7e4bd7abec508f85f1e984', crownUp: false, credit: '...' }, // Sketchfab embed
-  26: { src: 'assets/teeth/26.glb', crownUp: false, mirror: true },                     // local 3D file, mirrored
-  36: { src: 'assets/teeth/36.jpg' },                                                    // photo, crown-up
+  16: { src: 'assets/teeth/16.glb', crownUp: false, credit: '...' },  // local 3D file, posed crown-down
+  26: { src: 'assets/teeth/16.glb', crownUp: false, mirror: true },   // same file, mirrored
+  36: { src: 'assets/teeth/36.jpg' },                                  // photo, crown-up
+  46: { sketchfab: 'e719a474ef7e4bd7abec508f85f1e984' },              // Sketchfab embed (needs internet)
 };
 ```
 
-- `.glb` / `.gltf` files are shown with [`<model-viewer>`](https://modelviewer.dev) (loaded from
-  a CDN only when a model is present) and can be rotated with the mouse or finger.
+- `.glb` / `.gltf` files are shown with `<model-viewer>` and can be rotated with the mouse or finger.
+- `sketchfab` entries use Sketchfab's embed viewer (the viewer's own hint and title are clipped away).
 - Anything else (`png`, `jpg`, `webp`, `svg`) is shown as an image.
 - `crownUp: false` tells the app the file shows the tooth crown-down, so the orientation
   setting is applied correctly.
@@ -86,5 +88,6 @@ styles.css               styling
 js/teeth.js              tooth data, numbering, notes
 js/tooth-art.js          built-in SVG illustrations
 js/app.js                quiz logic
-assets/teeth/manifest.js Sketchfab ids (Dundee set) / optional local files
+assets/teeth/manifest.js maps teeth to the model files
+assets/teeth/*.glb       Dundee models (compressed)
 ```

@@ -143,13 +143,14 @@ const TOOTH_GEOMETRY = {
 let artSeq = 0;
 
 /* Returns an SVG string for a tooth.
-   opts.mirror: flip horizontally (used for left-side teeth)
-   opts.flip:   flip vertically (crown down) */
+   opts.mirror: mirror horizontally (used for left-side teeth)
+   opts.flip:   rotate 180° (crown down) */
 function renderToothSVG(tooth, opts = {}) {
   const g = TOOTH_GEOMETRY[tooth.arch][tooth.pos];
   const uid = 'ta' + (++artSeq);
-  const sx = opts.mirror ? -1 : 1, sy = opts.flip ? -1 : 1;
-  const tx = opts.mirror ? ART_W : 0, ty = opts.flip ? ART_H : 0;
+  // flip = 180° rotation (scale -1,-1); mirror = horizontal mirror; both = vertical mirror
+  const sx = (opts.mirror ? -1 : 1) * (opts.flip ? -1 : 1), sy = opts.flip ? -1 : 1;
+  const tx = sx < 0 ? ART_W : 0, ty = sy < 0 ? ART_H : 0;
 
   const rootPath = pts => `<path d="${smoothClosed(pts)}" fill="url(#${uid}-root)" stroke="#8c7a55" stroke-opacity="0.55" stroke-width="1.2"/>`;
   const backPath = pts => `<path d="${smoothClosed(pts)}" fill="url(#${uid}-rootBack)" stroke="#7d6b48" stroke-opacity="0.5" stroke-width="1.2"/>`;
