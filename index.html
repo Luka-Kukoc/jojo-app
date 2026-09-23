@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>Jojo App</title>
+  <meta name="description" content="Practice identifying human teeth. Pick the right tooth out of four options and get a score.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M20 8c-8 0-12 8-12 16 0 10 6 30 10 30s4-14 6-14 2 14 6 14 8-16 10-22c3-9 4-24-8-24-5 0-6 2-9 2s-3-2-3-2z' fill='%23f3f1ec'/%3E%3C/svg%3E">
+</head>
+<body>
+  <div class="bg"></div>
+
+  <main class="app" id="app">
+
+    <!-- START SCREEN -->
+    <section class="screen active" id="screen-start">
+      <div class="hero">
+        <div class="hero-tooth" id="hero-tooth" aria-hidden="true"></div>
+        <h1>Jojo App</h1>
+        <p class="tagline">Identify the tooth. Four options, one right answer.</p>
+      </div>
+
+      <div class="panel">
+        <div class="settings">
+          <div class="setting">
+            <span class="setting-label">Questions</span>
+            <div class="seg" data-setting="count">
+              <button data-value="10">10</button>
+              <button data-value="20">20</button>
+              <button data-value="all" class="on">All</button>
+            </div>
+          </div>
+
+          <div class="setting">
+            <span class="setting-label">Tooth display <span class="help" data-tip="3D model: real CT-based models from the University of Dundee, shown in the Sketchfab viewer (rotate with the mouse or finger; needs an internet connection). Illustration: the built-in drawings, works offline.">?</span></span>
+            <div class="seg" data-setting="display">
+              <button data-value="3d" class="on">3D model</button>
+              <button data-value="svg">Illustration</button>
+            </div>
+          </div>
+
+          <div class="setting">
+            <span class="setting-label">Numbering</span>
+            <div class="seg" data-setting="notation">
+              <button data-value="universal" class="on">Universal (1-32)</button>
+              <button data-value="fdi">FDI (11-48)</button>
+            </div>
+          </div>
+
+          <div class="setting">
+            <span class="setting-label">Orientation <span class="help" data-tip="Uniform: every tooth is shown crown-up, so orientation never reveals the arch. Anatomical: upper teeth are shown inverted, as in the mouth. Random: each tooth is flipped at random.">?</span></span>
+            <div class="seg" data-setting="orientation">
+              <button data-value="uniform" class="on">Uniform</button>
+              <button data-value="anatomical">Anatomical</button>
+              <button data-value="random">Random</button>
+            </div>
+          </div>
+
+          <div class="setting">
+            <span class="setting-label">Include</span>
+            <div class="chips" data-setting="groups">
+              <button data-value="incisors" class="on">Incisors</button>
+              <button data-value="canines" class="on">Canines</button>
+              <button data-value="premolars" class="on">Premolars</button>
+              <button data-value="molars" class="on">Molars</button>
+            </div>
+            <div class="chips" data-setting="arches">
+              <button data-value="upper" class="on">Upper</button>
+              <button data-value="lower" class="on">Lower</button>
+            </div>
+          </div>
+        </div>
+
+        <p class="warn hidden" id="start-warn">Select at least two teeth to practice.</p>
+
+        <button class="btn primary big" id="btn-start">Start</button>
+        <button class="btn ghost" id="btn-browse">Browse all teeth</button>
+
+        <p class="best" id="best-line"></p>
+      </div>
+    </section>
+
+    <!-- QUIZ SCREEN -->
+    <section class="screen" id="screen-quiz">
+      <div class="stage" id="stage">
+        <div class="tooth-view" id="tooth-view"></div>
+        <div class="tooth-view hidden-slot" id="tooth-view-alt"></div>
+        <p class="credit" id="tooth-credit"></p>
+        <button class="btn icon" id="btn-quit" title="Quit (Esc)" aria-label="Quit">✕</button>
+      </div>
+
+      <div class="panel quiz-panel">
+        <h2 class="prompt">Identify the tooth:</h2>
+        <div class="options" id="options"></div>
+        <div class="feedback" id="feedback" aria-live="polite"></div>
+        <div class="quiz-footer">
+          <span class="score-line" id="score-line"></span>
+          <span class="progress-line" id="progress-line"></span>
+          <button class="btn primary hidden" id="btn-next">Next</button>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      </div>
+    </section>
+
+    <!-- RESULTS SCREEN -->
+    <section class="screen" id="screen-results">
+      <div class="panel results">
+        <h2 id="results-title">Session complete</h2>
+        <div class="ring-wrap">
+          <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="ring-bg" cx="60" cy="60" r="52"/>
+            <circle class="ring-fg" id="ring-fg" cx="60" cy="60" r="52"/>
+          </svg>
+          <div class="ring-text">
+            <div class="ring-pct" id="ring-pct">0%</div>
+            <div class="ring-sub" id="ring-sub">0 / 0</div>
+          </div>
+        </div>
+        <p class="results-meta" id="results-meta"></p>
+
+        <div class="mistakes" id="mistakes"></div>
+
+        <div class="results-actions">
+          <button class="btn primary big" id="btn-again">Play again</button>
+          <button class="btn ghost hidden" id="btn-retry">Retry mistakes</button>
+          <button class="btn ghost" id="btn-home">Settings</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- BROWSE SCREEN -->
+    <section class="screen" id="screen-browse">
+      <div class="panel browse">
+        <div class="browse-head">
+          <h2>All 32 teeth</h2>
+          <button class="btn ghost small" id="btn-browse-back">Back</button>
+        </div>
+        <div class="browse-arch">
+          <h3>Upper</h3>
+          <div class="grid" id="grid-upper"></div>
+        </div>
+        <div class="browse-arch">
+          <h3>Lower</h3>
+          <div class="grid" id="grid-lower"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="assets/teeth/manifest.js"></script>
+  <script src="js/teeth.js"></script>
+  <script src="js/tooth-art.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
